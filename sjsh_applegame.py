@@ -1,4 +1,5 @@
-import pygame, time,ast
+import pygame, time, os, requests, ast, json
+from dotenv import load_dotenv
 
 # -----------------------------
 # 게임 초기화
@@ -26,7 +27,7 @@ def init_game(r=10, c=17, cell_sz=50, t_lim=120):
 def load_tile_images(cell_sz):
     tiles = {}
     for n in range(1, 10):
-        img = pygame.image.load(f"assets/sjsh_apple_{n}.png").convert_alpha()
+        img = pygame.image.load(f"assets/apple_{n}.png").convert_alpha()
         img = pygame.transform.smoothscale(img, (cell_sz, cell_sz))
         tiles[n] = img
     return tiles
@@ -35,10 +36,11 @@ def load_tile_images(cell_sz):
 # -----------------------------
 # 서버에서 보드(2차원 리스트) 받기: 여기만 채우세요
 # -----------------------------
-def fetch_board_from_server():
-    
- 
-    return None
+def fetch_board_from_server(key):
+    load_dotenv()
+    URL = os.environ.get('URL')
+    res = requests.get(URL + key)
+    return ast.literal_eval(json.loads(res.content)['data'])
 
 
 def validate_board(brd, r=10, c=17):
@@ -186,8 +188,9 @@ def show_end(scr, score):
 # main
 # -----------------------------
 if __name__ == "__main__":
+    key = input("key를 입력해 주세요: ")
     #먼저 서버에서 2차원 리스트 보드 받기
-    board = ast.literal_eval(input().strip())  #fetch_board_from_server()
+    board = fetch_board_from_server(key)
     if board is None:
         raise RuntimeError("fetch_board_from_server()가 보드를 반환하지 않았습니다. 서버 수신 코드를 채우세요.")
 
